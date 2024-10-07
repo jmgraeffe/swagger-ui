@@ -20,6 +20,8 @@ window.onload = function() {
       url: url,
       name: 'url'
     };
+  } else if (window.confirm('Click OK to get to the README on how to use that tool!')) {
+    window.open('https://github.com/jmgraeffe/swagger-ui-linkable');
   }
 
   // the following lines will be replaced by docker/configurator, when it runs in a docker-container
