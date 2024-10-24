@@ -1,0 +1,681 @@
+openapi: 3.0.3
+info:
+  title: ID-INT Visualization Server
+  description: |-
+    This document specifies the APIs provided by the ID-INT visualization server, which can be used to query topology data for AS- and device-level as well as aggregated telemetry data.
+  contact:
+    name: Maximilian Wolter
+    email: maximilian.wolter@st.ovgu.de
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about SCIONLab
+  url: https://www.scionlab.org/
+tags:
+  - name: "AsLevel"
+    description: "Endpoints for querying AS-level topology"
+  - name: "DeviceLevel"
+    description: "Endpoints for querying device-level topology"
+  - name: "Telemetry"
+    description: "Endpoints for querying telemetry data"
+paths:
+  /as:
+    get:
+      tags:
+        - AsLevel
+      summary: Get all ASes
+      description: Returns all collected ASes
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/As'
+        '500':
+          description: internal server error, see error field for details
+  /as/{isd}:
+    get:
+      tags:
+        - AsLevel
+      summary: Get all ASes in a specific ISD
+      parameters:
+        - name: isd
+          in: path
+          description: ID of ISD to filter ASes
+          required: true
+          schema:
+            type: integer
+            example: 17
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/As'
+        '400':
+          description: invalid ISD ID
+        '500':
+          description: internal server error, see error field for details
+  /as/{isd}/{as}:
+    get:
+      tags:
+        - AsLevel
+      summary: Get details about specific AS
+      parameters:
+        - name: isd
+          in: path
+          description: ISD ID of AS in question
+          required: true
+          schema:
+            type: integer
+            example: 17
+        - name: as
+          in: path
+          description: AS ID of AS in question
+          required: true
+          schema:
+            type: string
+            example: ffaa:0:1002
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsDetails'
+        '400':
+          description: invalid ISD ID and/or AS ID
+        '404':
+          description: AS not found
+        '500':
+          description: internal server error, see error field for details
+  /as/{isd}/{as}/{brinterface}:
+    get:
+      tags:
+        - AsLevel
+      summary: Get details about specific AS interface
+      parameters:
+        - name: isd
+          in: path
+          description: ISD ID of interface in question
+          required: true
+          schema:
+            type: integer
+            example: 19
+        - name: as
+          in: path
+          description: AS ID of interface in question
+          required: true
+          schema:
+            type: string
+            example: ffaa:0:1002
+        - name: brinterface
+          in: path
+          description: AS-level interface ID
+          required: true
+          schema:
+            type: integer
+            example: 76
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsIf'
+        '400':
+          description: invalid ISD/ID and/or AS ID and/or interface ID
+        '404':
+          description:  interface not found
+        '500':
+          description: internal server error, see error field for details
+  /node:
+    get:
+      tags:
+        - DeviceLevel
+      summary: Get all nodes
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+        '500':
+          description: internal server error, see error field for details
+  /node/{isd}:
+    get:
+      tags:
+        - DeviceLevel
+      summary: Get all nodes in a specific ISD
+      parameters:
+        - name: isd
+          in: path
+          description: ID of ISD to filter nodes
+          required: true
+          schema:
+            type: integer
+            example: 17
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+        '400':
+          description: invalid ISD ID
+        '500':
+          description: internal server error, see error field for details
+  /node/{isd}/{as}:
+    get:
+      tags:
+        - DeviceLevel
+      summary: Get all nodes in a specific AS
+      parameters:
+        - name: isd
+          in: path
+          description: ID of ISD to filter nodes
+          required: true
+          schema:
+            type: integer
+            example: 23
+        - name: as
+          in: path
+          description: ID of AS to filter nodes
+          required: true
+          schema:
+            type: integer
+            example: ffaa:0:1001
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+        '400':
+          description: invalid ISD ID and/or AS ID
+        '500':
+          description: internal server error, see error field for details
+  /node/{isd}/{as}/{node}:
+    get:
+      tags:
+        - DeviceLevel
+      summary: Get details about specific node
+      parameters:
+        - name: isd
+          in: path
+          description: ISD ID of node in question
+          required: true
+          schema:
+            type: integer
+            example: 19
+        - name: as
+          in: path
+          description: AS ID of node in question
+          required: true
+          schema:
+            type: string
+            example: ffaa:0:1002
+        - name: node
+          in: path
+          description: node ID
+          required: true
+          schema:
+            type: integer
+            example: 55
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeDetails'
+        '400':
+          description: invalid ISD ID and/or AS ID and/or node ID
+        '404':
+          description: node not found
+        '500':
+          description: internal server error, see error field for details
+  /node/{isd}/{as}/{node}/{interface}:
+    get:
+      tags:
+        - DeviceLevel
+      summary: Get details about specific node interface
+      parameters:
+        - name: isd
+          in: path
+          description: ISD IDof interface in question
+          required: true
+          schema:
+            type: integer
+            example: 19
+        - name: as
+          in: path
+          description: AS IDof interface in question
+          required: true
+          schema:
+            type: string
+            example: ffaa:0:1002
+        - name: node
+          in: path
+          description: node ID of interface in question
+          required: true
+          schema:
+            type: integer
+            example: 55
+        - name: interface
+          in: path
+          description: interface ID
+          required: true
+          schema:
+            type: integer
+            example: 99
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeIf'
+        '400':
+          description: invalid ISD ID and/or AS ID and/or node ID and/or interface ID
+        '404':
+          description: node interface not found
+        '500':
+          description: internal server error, see error field for details
+  /path:
+    get:
+      tags:
+        - AsLevel
+      summary: Get AS-level paths based on source & destination
+      parameters:
+        - name: sourceas
+          in: query
+          description: ISD ID and AS ID of source AS
+          required: true
+          schema:
+            type: string
+            example: 19-ffbb:9:2001
+        - name: destinationas
+          in: query
+          description: ISD ID and AS ID of destination AS
+          required: false
+          schema:
+            type: string
+            example: 17-ffaa:0:1002
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Path'
+        '400':
+          description: invalid source and/or destination ISD ID and/or AS ID
+        '500':
+          description: internal server error, see error field for details
+  /path/{path}:
+    get:
+      tags:
+        - AsLevel
+      summary: Get details about specific AS-level path
+      parameters:
+        - name: path
+          in: path
+          description: path ID
+          required: true
+          schema:
+            type: string
+            example: 12345
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PathDetails'
+        '400':
+          description: invalid path ID
+        '404':
+          description: path not found
+        '500':
+          description: internal server error, see error field for details
+  /telemetry:
+    get:
+      tags:
+        - Telemetry
+      summary: Get telemetry entries based on various filters
+      parameters:
+        - name: isd
+          in: query
+          description: ISD ID to query for
+          required: false
+          schema:
+            type: integer
+            example: 17
+        - name: as
+          in: query
+          description: AS ID to query for
+          required: false
+          schema:
+            type: string
+            example: 17-ffaa:0:1002
+        - name: node
+          in: query
+          description: node ID to query for
+          required: false
+          schema:
+            type: integer
+            example: 44
+        - name: interface
+          in: query
+          description: node/device-level interface ID to filter for
+          required: false
+          schema:
+            type: integer
+            example: 85
+        - name: buffer
+          in: query
+          description: buffer ID to query for
+          required: false
+          schema:
+            type: integer
+            example: 134
+        - name: queue
+          in: query
+          description: queue ID to query for
+          required: false
+          schema:
+            type: integer
+            example: 245
+        - name: type
+          in: query
+          description: instruction type(s), in other words the kind of metadata, to query for (multiple separated by comma)
+          required: true
+          schema:
+            type: string
+            example: 0x4a,0x4b
+        - name: samples
+          in: query
+          description: number of datapoints over the measured timeframe if possible distributed linearly
+          required: false
+          schema:
+            type: integer
+            example: 1000
+        - name: starttime
+          in: query
+          description: Unix timestamp of beginning of time frame in question
+          required: true
+          schema:
+            type: integer
+            example: 1729780551
+        - name: endtime
+          in: query
+          description: "Unix timestamp of end of time frame in question (default: now)"
+          required: false
+          schema:
+            type: integer
+            example: 1729780552
+        - name: filter
+          in: query
+          description: data aggregation method (if more datapoints than samples available, how to reduce them to number of samples)
+          required: false
+          schema:
+            type: string
+            enum: [first, last, min, max, mean]
+            example: mean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Telemetry'
+        '400':
+          description: invalid query parameter, see error field for details
+        '500':
+          description: internal server error, see error field for details
+components:
+  schemas:
+    As:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        core:
+          type: boolean
+          example: 1
+    LinkedAsIf:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        brinterface:
+          type: object
+          properties:
+            scion:
+              type: integer
+              example: 45
+            node:
+              type: object
+              properties:
+                node:
+                  type: integer
+                  example: 42
+                physicalinterface:
+                  type: integer
+                  example: 85
+    AsIf:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffab:42:1337
+        brinterface:
+          type: object
+          properties:
+            scion:
+              type: integer
+              example: 45
+            node:
+              type: integer
+              example: 89
+        brinterface_type:
+          type: string
+          enum: ["ingress", "egress"]
+          example: egress
+        linked_brinterface:
+          $ref: '#/components/schemas/LinkedAsIf'
+    AsDetails:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        core:
+          type: boolean
+          example: 1
+        brinterfaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/AsIf'
+    Node:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        node:
+          type: integer
+          example: 20
+    NodeIf:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        node:
+          type: integer
+          example: 20
+        interface:
+          type: integer
+          example: 56
+        interface_type:
+          type: string
+          enum: ["ingress", "egress"]
+          example: "ingress"
+        linked_interface:
+          type: object
+          properties:
+            isd:
+              type: integer
+              example: 19
+            as:
+              type: string
+              example: ffaa:0:1001
+            node:
+              type: integer
+              example: 20
+            interface:
+              type: integer
+              example: 56
+    NodeDetails:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        node:
+          type: integer
+          example: 20
+        interfaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeIf'
+    Path:
+      type: object
+      properties:
+        source:
+          type: object
+          properties:
+            isd:
+              type: integer
+              example: 19
+            as:
+              type: string
+              example: ffaa:0:1001
+        destination:
+          type: object
+          properties:
+            isd:
+              type: integer
+              example: 19
+            as:
+              type: string
+              example: ffaa:0:1001
+        path:
+          type: integer
+          example: 18256
+    Hop:
+      type: object
+      properties:
+        isd:
+          type: integer
+          example: 19
+        as:
+          type: string
+          example: ffaa:0:1001
+        brinterface_ingress:
+          type: integer
+          example: 87
+        brinterface_egress:
+          type: integer
+          example: 66
+    PathDetails:
+      type: object
+      properties:
+        source:
+          type: object
+          properties:
+            isd:
+              type: integer
+              example: 19
+            as:
+              type: string
+              example: ffaa:0:1001
+        destination:
+          type: object
+          properties:
+            isd:
+              type: integer
+              example: 19
+            as:
+              type: string
+              example: ffaa:0:1001
+        path:
+          type: integer
+          example: 18256
+        hops:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hop'
+    Telemetry:
+      type: object
+      properties:
+        '<inst #1  e.g. 0x74>':
+          type: object
+          properties:
+            firstTime:
+              type: integer
+              description: Unix timestamp of first datapoint
+            num:
+              type: integer
+              description: number of datapoints for this single instruction
+            timeValuePairs:
+              type: array
+              items:
+                type: array
+                description: time-value pairs for every detapoint, where the time is given as a delta to `firstTime` field
+                items:
+                  type: integer

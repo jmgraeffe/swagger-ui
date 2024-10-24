@@ -3,6 +3,10 @@ const aliases = {
     url: 'https://raw.githubusercontent.com/netsys-lab/bittorrent-over-scion/feature/http-ui/http_api/openapi3.yaml',
     name: 'http-ui@bittorrent-over-scion'
   },
+  'idint-vis-server': {
+    url: 'https://raw.githubusercontent.com/jmgraeffe/swagger-ui-linkable/refs/heads/master/local-specs/idint-vis-server.openapi3.yaml',
+    name: 'idint-vis-server'
+  },
   'petstore': {
     url: 'https://petstore.swagger.io/v2/swagger.json',
     name: 'petstore'
